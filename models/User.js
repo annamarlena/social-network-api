@@ -16,9 +16,22 @@ const userSchema = new mongoose.Schema({
    },
    thoughts: [ thoughtSchema ],
    friends: [ userSchema ]
+},
+{
+  toJSON: {
+    virtuals: true,
+  },
+  id: false,
 });
 
-// for seeding?
-// const User = mongoose.model('User', userSchema);
 
+userSchema.virtual('friendsCount').get(function () {
+  return `${this.friends.length}`;
+});
+
+let count = await User.findById()  // <------- need to insert the user id here, not sure how in mongo
+
+count.friendsCount 
+
+const User = mongoose.model('User', userSchema);
 module.exports = User;
