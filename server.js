@@ -19,7 +19,7 @@ app.post('/new-department/:department', (req, res) => {
     .create({ name: req.params.department })
     .then( data => res.json({data}))
     .catch( err => res.status(400).json({err} ) )
-});
+}); 
 
 // app.post('/new-department/:department', async (req, res) => {
 //   try {
