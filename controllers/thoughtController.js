@@ -1,9 +1,8 @@
-const { Thought } = require('../models');
-
 //const {ObjectId} = require('mongoose').Types;
-const ( Thought, User ) = require('../models');
+const { Thought, User } = require('../models');
 
 module.exports = {
+
   // GET all thoughts
   getThoughts(req, res) {
     Thought.find()
@@ -19,6 +18,8 @@ module.exports = {
         return res.status(500).json(err);
       });
   },
+
+
   // GET a single thought
   getSingleThought(req, res) {
     Thought.findOne({ _id: req.params.thoughtId })
@@ -36,12 +37,22 @@ module.exports = {
         return res.status(500).json(err);
       });
   },
+
+
   // CREATE a new thought
   createThought(req, res) {
-    Thought.create(req, res) 
-      .then((thought) => res.json(thought))
+    Thought.create(req.body) 
+      .then((thought) => {
+        User.findOneAndUpdate(
+          { _id: req.body.userId },
+          { $push: { thoughts: thought._id }},
+          { new: true }
+        ).then( updatedUser => res.json({ updatedUser }))
+      })
       .catch((err) => res.json(err));
   },
+
+
   // DELETE a thought and remove reactions
   deleteThought(req, res) {
     Thought.findOneAndRemove({ _id: req.params.thoughtId })
@@ -50,7 +61,7 @@ module.exports = {
           ? res.status(404).json({ message: "No such thought exists!" })
           : User.findOneAndUpdate(
               { thoughts: req.params.thoughtId },
-              { $push: { friends: req.params.friendId } },
+              { $push: { friends: req.params.friendId } },  // might be $addToSet
               { $push: { reactions: req.body } },
               { $pull: { reactions: {reactionId: req.params.reactionId }} },
               { new: true }
