@@ -7,18 +7,13 @@ module.exports = {
   getThoughts(req, res) {
     Thought.find()
       .then(async (thoughts) => {
-        const thoughtObj = {
-          thoughts,
-          count: await count(),
-        };
-        return res.json(thoughtObj);
+        return res.json(thoughts);
       })
       .catch((err) => {
         console.log(err);
         return res.status(500).json(err);
       });
   },
-
 
   // GET a single thought
   getSingleThought(req, res) {
@@ -29,7 +24,7 @@ module.exports = {
           ? res.status(404).json({ message: "No thought with that ID!" })
           : res.json({
             thought,
-            reaction: await reaction(req.params.thoughtId),
+            // reaction: await reaction(req.params.thoughtId),
           })
       )
       .catch((err) => {
@@ -37,7 +32,6 @@ module.exports = {
         return res.status(500).json(err);
       });
   },
-
 
   // CREATE a new thought
   createThought(req, res) {
@@ -52,7 +46,6 @@ module.exports = {
       .catch((err) => res.json(err));
   },
 
-
   // DELETE a thought and remove reactions
   deleteThought(req, res) {
     Thought.findOneAndRemove({ _id: req.params.thoughtId })
@@ -60,11 +53,10 @@ module.exports = {
         !thought
           ? res.status(404).json({ message: "No such thought exists!" })
           : User.findOneAndUpdate(
-              { thoughts: req.params.thoughtId },
-              { $push: { friends: req.params.friendId } },  // might be $addToSet
-              { $push: { reactions: req.body } },
-              { $pull: { reactions: {reactionId: req.params.reactionId }} },
-              { new: true }
+              { username: thought.username },
+              // { $push: { friends: req.params.friendId } },  // might be $addToSet
+              { $pull: { thoughts: thought._id} },
+              { new: true, runValidators: true }
             )
       )
       .then((reaction) => 
